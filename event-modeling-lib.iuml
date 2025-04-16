@@ -29,6 +29,11 @@
     .wireframe {
         BackgroundColor #fff
     }
+    .timeline {
+        BackgroundColor black
+        LineColor black
+        LineThickness 2
+    }
     .hidden {
         FontSize 0
         LineThickness 0
@@ -90,6 +95,9 @@ hide <<extra>> stereotype
 !$autospacing_averagePixelsPerCharacter = 7
 !$autospacing_defaultNodeWidth = 55
 !$autospacing_pixelsPerLineIncrement = 35
+
+!$timeline_default_figure = "rectangle"
+!$timeline_default_name = "Timeline"
 
 /'
 **************** Pseudo data structures used *********************
@@ -315,7 +323,11 @@ The variables can be mutated using $_get, $_set, and $_exists
     $_set($_laneTypeOrder(1), "wireframe")
     $_set($_laneTypeOrder(2), "commandview")
     $_set($_laneTypeOrder(3), "event")
-    $_set($_laneTypeOrderMaxIndex, 3)
+    $_set($_laneTypeOrder(4), "timeline")
+    $_set($_laneTypeOrder(5), "event_persona")
+    $_set($_laneTypeOrder(6), "commandview_persona")
+    $_set($_laneTypeOrder(7), "wireframe_persona")
+    $_set($_laneTypeOrderMaxIndex, 7)
 !endprocedure
 $_autoConfigureLaneTypes()
 
@@ -647,6 +659,54 @@ $_autoConfigureLaneTypes()
     !$headingAlias = $_createOrVerifyAlias($headingName, $headingAlias)
     !$laneIndex = $_lookupLaneIndex("event", $laneAlias)
     $_configureLane("event", $laneIndex, $laneAlias, $headingName, $event_heading_default_figure, "concept", $headingAlias, $context)
+!endprocedure
+
+!unquoted procedure $timeline()
+    $_addNode("timeline", 0, $timeline_default_name, "", $timeline_default_figure, "timeline", 0, 0)
+!endprocedure
+
+!unquoted procedure $event_persona($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
+    !$laneIndex = $_lookupLaneIndex("event_persona", $laneAlias)
+    $_addNode("event_persona", $laneIndex, $name, $alias, $figure, "event", $offset, $arrow)
+!endprocedure
+
+!unquoted procedure $command_persona($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
+    $_addNode("commandview_persona", 0, $name, $alias, $figure, "command", $offset, $arrow)
+!endprocedure
+
+!unquoted procedure $view_persona($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
+    $_addNode("commandview_persona", 0, $name, $alias, $figure, "view", $offset, $arrow)
+!endprocedure
+
+!unquoted procedure $wireframe_persona($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
+    !$laneIndex = $_lookupLaneIndex("wireframe_persona", $laneAlias)
+    $_addNode("wireframe_persona", $laneIndex, $name, $alias, $figure, "wireframe", $offset, $arrow)
+!endprocedure
+
+!unquoted procedure $configureEventPersonaLane($laneAlias, $headingName = "", $headingAlias = "", $context = "")
+    !if $headingName == ""
+        !$headingName = $laneAlias
+    !endif
+    !$laneAlias = $_createOrVerifyAlias($laneAlias)
+    !if $headingAlias == ""
+        !$headingAlias = $laneAlias + "heading"
+    !endif
+    !$headingAlias = $_createOrVerifyAlias($headingName, $headingAlias)
+    !$laneIndex = $_lookupLaneIndex("event_persona", $laneAlias)
+    $_configureLane("event_persona", $laneIndex, $laneAlias, $headingName, $event_heading_default_figure, "concept", $headingAlias, $context)
+!endprocedure
+
+!unquoted procedure $configureWireframePersonaLane($laneAlias, $headingName = "", $headingAlias = "")
+    !if $headingName == ""
+        !$headingName = $laneAlias
+    !endif
+    !$laneAlias = $_createOrVerifyAlias($laneAlias)
+    !if $headingAlias == ""
+        !$headingAlias = $laneAlias + "heading"
+    !endif
+    !$headingAlias = $_createOrVerifyAlias($headingName, $headingAlias)
+    !$laneIndex = $_lookupLaneIndex("wireframe_persona", $laneAlias)
+    $_configureLane("wireframe_persona", $laneIndex, $laneAlias, $headingName, $wireframe_heading_default_figure, "", $headingAlias)
 !endprocedure
 
 /'
