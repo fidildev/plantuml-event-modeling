@@ -34,6 +34,15 @@
         LineColor black
         LineThickness 2
     }
+    .externalsystem {
+        BackgroundColor pink
+    }
+    .question {
+        BackgroundColor red
+    }
+    .policy {
+        BackgroundColor #E6B3FF
+    }
     .hidden {
         FontSize 0
         LineThickness 0
@@ -55,6 +64,18 @@
     .defaultarrow {
         arrow {
             LineColor black
+            LineThickness 2
+        }
+    }
+    .externalsystemarrow {
+        arrow {
+            LineColor pink
+            LineThickness 2
+        }
+    }
+    .policyarrow {
+        arrow {
+            LineColor #E6B3FF
             LineThickness 2
         }
     }
@@ -327,7 +348,10 @@ The variables can be mutated using $_get, $_set, and $_exists
     $_set($_laneTypeOrder(5), "event_persona")
     $_set($_laneTypeOrder(6), "commandview_persona")
     $_set($_laneTypeOrder(7), "wireframe_persona")
-    $_set($_laneTypeOrderMaxIndex, 7)
+    $_set($_laneTypeOrder(8), "externalsystem")
+    $_set($_laneTypeOrder(9), "question")
+    $_set($_laneTypeOrder(10), "policy")
+    $_set($_laneTypeOrderMaxIndex, 10)
 !endprocedure
 $_autoConfigureLaneTypes()
 
@@ -461,20 +485,28 @@ $_autoConfigureLaneTypes()
                 $arrow($previousNodeAlias, $currentNodeAlias)
             !endif
         !elseif $previousNodeStereotype == "command"
-            !if $currentNodeStereotype == "event"
+            !if $currentNodeStereotype == "event" || $currentNodeStereotype == "externalsystem" || $currentNodeStereotype == "policy"
                 $commandarrow($previousNodeAlias, $currentNodeAlias)
             !endif
         !elseif $previousNodeStereotype == "event"
-            !if $currentNodeStereotype == "view" || $currentNodeStereotype == "extra"
+            !if $currentNodeStereotype == "view" || $currentNodeStereotype == "extra" || $currentNodeStereotype == "policy"
                 $eventarrow($previousNodeAlias, $currentNodeAlias)
             !endif
         !elseif $previousNodeStereotype == "view"
-            !if $currentNodeStereotype == "wireframe"
+            !if $currentNodeStereotype == "wireframe" || $currentNodeStereotype == "policy"
                 $arrow($previousNodeAlias, $currentNodeAlias)
             !endif
         !elseif $previousNodeStereotype == "extra"
-            !if $currentNodeStereotype == "command"
+            !if $currentNodeStereotype == "command" || $currentNodeStereotype == "policy"
                 $commandarrow($previousNodeAlias, $currentNodeAlias)
+            !endif
+        !elseif $previousNodeStereotype == "externalsystem"
+            !if $currentNodeStereotype == "event" || $currentNodeStereotype == "policy"
+                $externalsystemarrow($previousNodeAlias, $currentNodeAlias)
+            !endif
+        !elseif $previousNodeStereotype == "policy"
+            !if $currentNodeStereotype == "command" || $currentNodeStereotype == "event" || $currentNodeStereotype == "view" || $currentNodeStereotype == "extra" || $currentNodeStereotype == "externalsystem" || $currentNodeStereotype == "policy"
+                $policyarrow($previousNodeAlias, $currentNodeAlias)
             !endif
         !endif
     
@@ -747,6 +779,29 @@ $_autoConfigureLaneTypes()
     $_addArrow($from, $to, defaultarrow)
 !endprocedure
 
+!unquoted procedure $externalsystem($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
+    !$laneIndex = $_lookupLaneIndex("externalsystem", $laneAlias)
+    $_addNode("externalsystem", $laneIndex, $name, $alias, $figure, "externalsystem", $offset, $arrow)
+!endprocedure
+
+!unquoted procedure $question($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
+    !$laneIndex = $_lookupLaneIndex("question", $laneAlias)
+    $_addNode("question", $laneIndex, $name, $alias, $figure, "question", $offset, $arrow)
+!endprocedure
+
+!unquoted procedure $externalsystemarrow($from, $to)
+    $_addArrow($from, $to, externalsystemarrow)
+!endprocedure
+
+!unquoted procedure $policyarrow($from, $to)
+    $_addArrow($from, $to, policyarrow)
+!endprocedure
+
+!unquoted procedure $policy($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
+    !$laneIndex = $_lookupLaneIndex("policy", $laneAlias)
+    $_addNode("policy", $laneIndex, $name, $alias, $figure, "policy", $offset, $arrow)
+!endprocedure
+
 /'
 **************** Public procedures to render the recorded nodes *********************
 '/
@@ -755,5 +810,6 @@ $_autoConfigureLaneTypes()
     $_renderLaneTypes()
     $_renderArrows()
 !endprocedure
+
 
 @enduml
