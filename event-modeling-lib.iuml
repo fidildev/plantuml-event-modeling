@@ -288,6 +288,17 @@ The variables can be mutated using $_get, $_set, and $_exists
     !return $result
 !endfunction
 
+/'
+**************** Field formatting helper *********************
+Formats a fields string by adding a separator
+'/
+!function $_formatFields($fields)
+    !if $fields == ""
+        !return ""
+    !endif
+    !return "\n---\n" + $fields
+!endfunction
+
 !function $_estimateTextWidthInPixels($text)
     !return %strlen($text) * $autospacing_averagePixelsPerCharacter
 !endfunction
@@ -442,7 +453,7 @@ $_autoConfigureLaneTypes()
     !return $distanceToPrevious
 !endfunction
 
-!procedure $_addNode($laneType, $laneIndex, $name, $alias = "", $figure, $stereotype = "", $offset = 0, $autoArrow = 0)
+!procedure $_addNode($laneType, $laneIndex, $name, $alias = "", $figure, $stereotype = "", $offset = 0, $autoArrow = 0, $fields = "")
     !$alias = $_createOrVerifyAlias($name, $alias)
 
     ' Compute array append index
@@ -461,14 +472,17 @@ $_autoConfigureLaneTypes()
         !endif
     !endif
 
+    ' Format name with fields if provided
+    !$formattedName = $name + $_formatFields($fields)
+
     ' Compute spacing
     !$distanceToPrevious = $offset
     !if $configuration_enable_auto_spacing == 1
-        !$distanceToPrevious = $_computeAutoSpacing($laneType, $laneIndex, $name, $figure, $offset)
+        !$distanceToPrevious = $_computeAutoSpacing($laneType, $laneIndex, $formattedName, $figure, $offset)
     !endif
 
     ' Write into array
-    $_storeNode($laneType, $laneIndex, $itemIndex, $name, $alias, $figure, $stereotype, $distanceToPrevious)
+    $_storeNode($laneType, $laneIndex, $itemIndex, $formattedName, $alias, $figure, $stereotype, $distanceToPrevious)
 
     ' Enable optional support for automatically adding an arrow from the previous node
     $_autoAddArrow($alias, $stereotype, $autoArrow)
@@ -509,7 +523,7 @@ $_autoConfigureLaneTypes()
                 $policyarrow($previousNodeAlias, $currentNodeAlias)
             !endif
         !endif
-    
+
     !endif
 
     $_set($_previousNode("alias"), $currentNodeAlias)
@@ -697,22 +711,22 @@ $_autoConfigureLaneTypes()
     $_addNode("timeline", 0, $timeline_default_name, "", $timeline_default_figure, "timeline", 0, 0)
 !endprocedure
 
-!unquoted procedure $event_persona($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
+!unquoted procedure $event_persona($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")
     !$laneIndex = $_lookupLaneIndex("event_persona", $laneAlias)
-    $_addNode("event_persona", $laneIndex, $name, $alias, $figure, "event", $offset, $arrow)
+    $_addNode("event_persona", $laneIndex, $name, $alias, $figure, "event", $offset, $arrow, $fields)
 !endprocedure
 
-!unquoted procedure $command_persona($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
-    $_addNode("commandview_persona", 0, $name, $alias, $figure, "command", $offset, $arrow)
+!unquoted procedure $command_persona($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")
+    $_addNode("commandview_persona", 0, $name, $alias, $figure, "command", $offset, $arrow, $fields)
 !endprocedure
 
-!unquoted procedure $view_persona($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
-    $_addNode("commandview_persona", 0, $name, $alias, $figure, "view", $offset, $arrow)
+!unquoted procedure $view_persona($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")
+    $_addNode("commandview_persona", 0, $name, $alias, $figure, "view", $offset, $arrow, $fields)
 !endprocedure
 
-!unquoted procedure $wireframe_persona($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
+!unquoted procedure $wireframe_persona($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")
     !$laneIndex = $_lookupLaneIndex("wireframe_persona", $laneAlias)
-    $_addNode("wireframe_persona", $laneIndex, $name, $alias, $figure, "wireframe", $offset, $arrow)
+    $_addNode("wireframe_persona", $laneIndex, $name, $alias, $figure, "wireframe", $offset, $arrow, $fields)
 !endprocedure
 
 !unquoted procedure $configureEventPersonaLane($laneAlias, $headingName = "", $headingAlias = "", $context = "")
@@ -745,26 +759,26 @@ $_autoConfigureLaneTypes()
 **************** Public procedures to record nodes and arrows *********************
 '/
 
-!unquoted procedure $extra($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
-    $_addNode("extra", 0, $name, $alias, $figure, "extra", $offset, $arrow)
+!unquoted procedure $extra($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")
+    $_addNode("extra", 0, $name, $alias, $figure, "extra", $offset, $arrow, $fields)
 !endprocedure
 
-!unquoted procedure $wireframe($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
+!unquoted procedure $wireframe($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")
     !$laneIndex = $_lookupLaneIndex("wireframe", $laneAlias)
-    $_addNode("wireframe", $laneIndex, $name, $alias, $figure, "wireframe", $offset, $arrow)
+    $_addNode("wireframe", $laneIndex, $name, $alias, $figure, "wireframe", $offset, $arrow, $fields)
 !endprocedure
 
-!unquoted procedure $command($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
-    $_addNode("commandview", 0, $name, $alias, $figure, "command", $offset, $arrow)
+!unquoted procedure $command($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")
+    $_addNode("commandview", 0, $name, $alias, $figure, "command", $offset, $arrow, $fields)
 !endprocedure
 
-!unquoted procedure $view($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
-    $_addNode("commandview", 0, $name, $alias, $figure, "view", $offset, $arrow)
+!unquoted procedure $view($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")
+    $_addNode("commandview", 0, $name, $alias, $figure, "view", $offset, $arrow, $fields)
 !endprocedure
 
-!unquoted procedure $event($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
+!unquoted procedure $event($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")
     !$laneIndex = $_lookupLaneIndex("event", $laneAlias)
-    $_addNode("event", $laneIndex, $name, $alias, $figure, "event", $offset, $arrow)
+    $_addNode("event", $laneIndex, $name, $alias, $figure, "event", $offset, $arrow, $fields)
 !endprocedure
 
 !unquoted procedure $commandarrow($from, $to)
@@ -779,14 +793,14 @@ $_autoConfigureLaneTypes()
     $_addArrow($from, $to, defaultarrow)
 !endprocedure
 
-!unquoted procedure $externalsystem($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
+!unquoted procedure $externalsystem($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")
     !$laneIndex = $_lookupLaneIndex("externalsystem", $laneAlias)
-    $_addNode("externalsystem", $laneIndex, $name, $alias, $figure, "externalsystem", $offset, $arrow)
+    $_addNode("externalsystem", $laneIndex, $name, $alias, $figure, "externalsystem", $offset, $arrow, $fields)
 !endprocedure
 
-!unquoted procedure $question($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
+!unquoted procedure $question($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")
     !$laneIndex = $_lookupLaneIndex("question", $laneAlias)
-    $_addNode("question", $laneIndex, $name, $alias, $figure, "question", $offset, $arrow)
+    $_addNode("question", $laneIndex, $name, $alias, $figure, "question", $offset, $arrow, $fields)
 !endprocedure
 
 !unquoted procedure $externalsystemarrow($from, $to)
@@ -797,9 +811,9 @@ $_autoConfigureLaneTypes()
     $_addArrow($from, $to, policyarrow)
 !endprocedure
 
-!unquoted procedure $policy($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)
+!unquoted procedure $policy($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")
     !$laneIndex = $_lookupLaneIndex("policy", $laneAlias)
-    $_addNode("policy", $laneIndex, $name, $alias, $figure, "policy", $offset, $arrow)
+    $_addNode("policy", $laneIndex, $name, $alias, $figure, "policy", $offset, $arrow, $fields)
 !endprocedure
 
 /'

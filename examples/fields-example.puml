@@ -1,0 +1,39 @@
+@startuml
+!include_once ../event-modeling-lib.iuml
+
+$enableAutoAlias()
+$enableAutoSpacing()
+
+$configureWireframeLane(Automation)
+$configureWireframeLane(Client)
+$configureEventLane(Subscription, $context = "Subscription")
+$configureEventLane(Transaction, $context = "Transaction")
+
+' Example 1: Command with fields
+$command("CreateSubscription", $fields = "userId: string\nplanId: string\namount: decimal\nstartDate: date")
+
+' Example 2: Policy with invariants/rules
+$policy("CreateSubscriptionPolicy", $fields = "Validate userId exists\nCheck plan is active\nVerify amount > 0\nEnsure no duplicate subscription")
+
+' Example 3: Event with data fields
+$event("SubscriptionCreated", Subscription, $fields = "subscriptionId: UUID\nuserId: string\nplanId: string\namount: decimal\ncreatedAt: timestamp\nstatus: active")
+
+' Example 4: View with display fields
+$view("Subscriptions View", $fields = "subscriptionId\nuserId\nplanName\nstatus\namount\nexpiryDate\ncreatedAt")
+
+' Example 5: Wireframe with UI fields
+$wireframe("Subscription Screen", Client, $fields = "Display:\n• Subscription details\n• Payment history\n• Plan features\n• Cancel button")
+
+' Example 6: Another event in different lane
+$event("PaymentProcessed", Transaction, $fields = "transactionId: UUID\nsubscriptionId: UUID\namount: decimal\npaymentMethod: string\nprocessedAt: timestamp")
+
+' Example 7: View with formatted fields
+$view("Payment History", $fields = "<b>Columns:</b>\n• Transaction ID\n• Date\n• Amount\n• Status")
+
+' Example 8: External system with fields
+$externalsystem("Payment Gateway", Transaction, $fields = "API: /process-payment\nMethod: POST\nTimeout: 30s")
+
+$renderEventModelingDiagram()
+
+@enduml
+

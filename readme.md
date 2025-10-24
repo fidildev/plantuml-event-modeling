@@ -64,17 +64,19 @@ Configuration:
 
 Adding elements:
 
-- **\$wireframe($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)**
+- **\$wireframe($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")**
     - **$name** - The visible name of the element
     - **$laneAlias** - The lane where this element is placed
     - **$offset** - Change the horizontal positioning
     - **$arrow** - Boolean determining if an arrow is generated from the previous element to this one. Illogical arrows (e.g. from an event to and event) are never automatically generated.
     - **$alias** - Manually provide an alias to reference this element by. This can be useful when renaming the element without having to adjust the references.
     - **$figure** - Allows changing the visual figure for this element. All PlantUML figures for the [deployment diagram](https://plantuml.com/deployment-diagram) are available.
-- **\$command($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)**
-- **\$view($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)**
-- **\$event($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)**
-- **\$extra($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure)** - These elements are placed at the top lane and can be used for e.g. translation, automation, and sagas.
+    - **$fields** - Optional field definitions to display below the element name, separated by `\n`. A separator line is automatically added.
+- **\$command($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")**
+- **\$view($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")**
+- **\$event($name, $laneAlias = "defaultLane", $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")**
+- **\$policy($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")** - Automation policies that react to events
+- **\$extra($name, $offset = 0, $arrow = 1, $alias = "", $figure = $default_figure, $fields = "")** - These elements are placed at the top lane and can be used for e.g. translation, automation, and sagas.
 
 Adding arrows:
 
@@ -94,16 +96,41 @@ Element styling can be done by overriding the style (see under [Customization](#
 Text styling and images are possible using [PlantUML creole syntax](https://plantuml.com/creole). For example:
 
 ```plantuml
-@startuml  
-!include_once event-modeling-lib.iuml  
-  
+@startuml
+!include_once event-modeling-lib.iuml
+
 $wireframe(<img:http://plantuml.com/logo3.png>, $alias = "imageElement")
-$event(OrderSubmitted\n---\n<b>Example of a \n<b>comment, $alias = "OrderSubmitted")  
-  
-$renderEventModelingDiagram()  
+$event(OrderSubmitted\n---\n<b>Example of a \n<b>comment, $alias = "OrderSubmitted")
+
+$renderEventModelingDiagram()
 @enduml
 ```
 ![Example diagram](examples/Example2.png)
+
+### Adding Fields to Elements
+
+You can add field definitions to commands, events, views, policies, and wireframes using the `$fields` parameter. Fields are displayed below the element name with an automatic separator line:
+
+```plantuml
+@startuml
+!include_once event-modeling-lib.iuml
+
+$enableAutoAlias()
+$enableAutoSpacing()
+
+$configureEventLane(Order)
+
+$command(SubmitOrder, $fields = "customerId: UUID\nproductId: UUID\nquantity: int")
+$event(OrderSubmitted, Order, $fields = "orderId: UUID\nstatus: pending\nsubmittedAt: timestamp")
+$view(OrdersList, $fields = "orderId\ncustomerName\nstatus\ntotalAmount")
+$policy(ValidateInventory, $fields = "Check stock levels\nReserve items\nNotify if unavailable")
+
+$renderEventModelingDiagram()
+@enduml
+```
+![Fields example](examples/simple-fields-demo.png)
+
+See [examples/fields-example.puml](examples/fields-example.puml) for a comprehensive demonstration of fields across all element types.
 
 ## Customization
 All styles, variables, and procedures defined in the library can be overridden by redefining them after the include:

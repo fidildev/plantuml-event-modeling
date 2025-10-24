@@ -1,0 +1,25 @@
+@startuml
+!include_once ../event-modeling-lib.iuml
+
+$enableAutoAlias()
+$enableAutoSpacing()
+
+$configureWireframeLane(User)
+$configureEventLane(Order)
+
+' Simple order flow with fields
+
+$wireframe("Order Form", User, $fields = "Product selector\nQuantity input\nSubmit button")
+
+$command("SubmitOrder", $fields = "customerId: UUID\nproductId: UUID\nquantity: int\ntotalAmount: decimal")
+
+$event("OrderSubmitted", Order, $fields = "orderId: UUID\ncustomerId: UUID\nproductId: UUID\nquantity: int\ntotalAmount: decimal\nsubmittedAt: timestamp\nstatus: pending")
+
+$view("Orders List", $fields = "orderId\ncustomerName\nproductName\nquantity\ntotalAmount\nstatus\nsubmittedAt")
+
+$wireframe("Order Confirmation", User, $fields = "Order number\nOrder details\nEstimated delivery\nTracking link")
+
+$renderEventModelingDiagram()
+
+@enduml
+

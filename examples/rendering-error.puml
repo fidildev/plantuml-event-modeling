@@ -1,0 +1,36 @@
+@startuml
+!include_once ../event-modeling-lib.iuml
+
+$enableAutoAlias()
+$enableAutoSpacing()
+
+$configureWireframeLane(Automation)
+$configureWireframeLane(Client)
+
+$configureEventLane(Subscription, $context = Subscription)
+$configureEventLane(Transaction, $context = Transaction)
+
+' Incoming event triggers the flow
+$event("OrderCreated", Subscription, $fields = "orderId: UUID\ncustomerId: string\norderTotal: decimal")
+
+' Command to create subscription with required fields
+$command("CreateSubscription", $fields = "userId: string\nplanId: string\namount: decimal")
+
+' Policy invariant between command and event with validation rules
+$policy("CreateSubscriptionPolicy", $fields = "Validate userId exists\nCheck plan is active\nVerify amount > 0")
+
+' Event produced by command with event data
+$event("SubscriptionCreated", Subscription, $fields = "subscriptionId: UUID\nuserId: string\nplanId: string\ncreatedAt: timestamp")
+
+' Event updates view with display fields
+$view("Subscriptions View", $fields = "subscriptionId\nstatus\nplanName\nexpiryDate")
+
+' View displayed on UI
+$wireframe("Subscription Screen", Client, $fields = "Display subscription details\nShow payment history\nCancel button")
+
+' Internal automation/processor
+$extra("ProvisioningProcessor", $figure = "rectangle", $fields = "Process: Provision resources\nNotify: Send confirmation")
+
+$renderEventModelingDiagram()
+
+@enduml
