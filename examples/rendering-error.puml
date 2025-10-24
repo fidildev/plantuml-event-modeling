@@ -7,29 +7,22 @@ $enableAutoSpacing()
 $configureWireframeLane(Automation)
 $configureWireframeLane(Client)
 
-$configureEventLane(Subscription, $context = Subscription)
-$configureEventLane(Transaction, $context = Transaction)
+$configureEventLane(Subscription,  $context = "Subscription")
 
-' Incoming event triggers the flow
-$event("OrderCreated", Subscription, $fields = "orderId: UUID\ncustomerId: string\norderTotal: decimal")
+' Command to create subscription with fields
+$command("CreateSubscription", $fields = "customerId: UUID\nproductId: UUID\nquantity: int\nstartDate: Date")
 
-' Command to create subscription with required fields
-$command("CreateSubscription", $fields = "userId: string\nplanId: string\namount: decimal")
+' Policy invariant between command and event
+$policy("CreateSubscriptionPolicy")
 
-' Policy invariant between command and event with validation rules
-$policy("CreateSubscriptionPolicy", $fields = "Validate userId exists\nCheck plan is active\nVerify amount > 0")
+' Event produced by command with fields
+$event("SubscriptionCreated", Subscription, $fields = "subscriptionId: UUID\ncustomerId: UUID\nproductId: UUID\nquantity: int\nstartDate: Date\ncreatedAt: DateTime")
 
-' Event produced by command with event data
-$event("SubscriptionCreated", Subscription, $fields = "subscriptionId: UUID\nuserId: string\nplanId: string\ncreatedAt: timestamp")
-
-' Event updates view with display fields
-$view("Subscriptions View", $fields = "subscriptionId\nstatus\nplanName\nexpiryDate")
+' Event updates view with fields
+$view("Subscriptions View", $fields = "subscriptionId\ncustomerName\nproductName\nquantity\nstartDate\nstatus")
 
 ' View displayed on UI
-$wireframe("Subscription Screen", Client, $fields = "Display subscription details\nShow payment history\nCancel button")
-
-' Internal automation/processor
-$extra("ProvisioningProcessor", $figure = "rectangle", $fields = "Process: Provision resources\nNotify: Send confirmation")
+$wireframe("Subscription Screen", Client)
 
 $renderEventModelingDiagram()
 

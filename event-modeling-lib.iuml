@@ -1,4 +1,3 @@
-@startuml
 /'
     Event Modeling library for PlantUML
 
@@ -826,4 +825,3 @@ $_autoConfigureLaneTypes()
 !endprocedure
 
 
-@enduml
